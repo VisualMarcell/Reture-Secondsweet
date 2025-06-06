@@ -3,13 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Second Sweet Reture</title>
+  <title>Second Sweet Return</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="manifest" href="manifest.json" />
 </head>
 <body>
-  <h1>Form Retur - Second Sweet Reture</h1>
-
+  <h1>Return Form</h1>
   <form id="returForm">
     <label>Username:</label>
     <input type="text" name="username" required />
@@ -34,14 +33,13 @@
 
     <button type="submit">Kirim</button>
   </form>
-
   <button onclick="logout()">Logout</button>
 
-  <!-- Firebase SDK (modular) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
     import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
 
+    // ========== KONFIGURASI FIREBASE ==========
     const firebaseConfig = {
       apiKey: "AIzaSyBKHl5yyXVwI27W3C9Q504mMWMoGkm6hlo",
       authDomain: "second-sweet-reture.firebaseapp.com",
@@ -55,7 +53,7 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
-    // Cek status login
+    // ========== AUTENTIKASI ==========
     onAuthStateChanged(auth, (user) => {
       if (!user) {
         alert("Anda belum login.");
@@ -65,7 +63,6 @@
       }
     });
 
-    // Logout
     window.logout = function () {
       signOut(auth).then(() => {
         localStorage.removeItem("loggedInEmail");
@@ -74,32 +71,47 @@
       });
     };
 
-    // Kirim data ke Google Sheets
+    // ========== KIRIM DATA KE AIRTABLE ==========
     document.getElementById("returForm").addEventListener("submit", function (e) {
       e.preventDefault();
 
+      const API_KEY = "pat82jgd9bLAaUqxk.6429f0b8df5bee458b3ecce387235f4023c2b395f3b0405622b9f8378f4a15da"; // <-- Ganti dengan Personal Access Token Airtable
+      const BASE_ID = "appCS1r5N9daQtLNI"; // <-- Ganti dengan Base ID kamu
+      const TABLE_NAME = "Data%20Retur"; // (URL-encoded jika ada spasi: Data Retur -> Data%20Retur)
+
+      // Siapkan data sesuai dengan kolom di Airtable
       const formData = {
-        email: localStorage.getItem("loggedInEmail"),
-        username: document.querySelector('[name="username"]').value,
-        nama: document.querySelector('[name="nama"]').value,
-        nomor_hp: document.querySelector('[name="nomor_hp"]').value,
-        alamat: document.querySelector('[name="alamat"]').value,
-        tgl_pesanan: document.querySelector('[name="tgl_pesanan"]').value,
-        tgl_retur: document.querySelector('[name="tgl_retur"]').value,
-        alasan: document.querySelector('[name="alasan"]').value
+        "Email": localStorage.getItem("loggedInEmail"),
+        "Username": document.querySelector('[name="username"]').value,
+        "Nama": document.querySelector('[name="nama"]').value,
+        "Nomor HP": document.querySelector('[name="nomor_hp"]').value,
+        "Alamat": document.querySelector('[name="alamat"]').value,
+        "Tanggal Pesanan": document.querySelector('[name="tgl_pesanan"]').value,
+        "Tanggal Retur": document.querySelector('[name="tgl_retur"]').value,
+        "Alasan": document.querySelector('[name="alasan"]').value
       };
 
-      fetch("https://script.google.com/macros/s/AKfycby__TDbSfvRgQeN0xIIYe8_t0yUl-ocEOT-tgOBJLDYasdXCtswQGsnow2mYpbRULAo/exec", {
+      fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_NAME}`, {
         method: "POST",
-        body: JSON.stringify(formData),
         headers: {
+          "Authorization": `Bearer ${API_KEY}`,
           "Content-Type": "application/json"
-        }
+        },
+        body: JSON.stringify({
+          records: [
+            { fields: formData }
+          ]
+        })
       })
-      .then(res => res.text())
+      .then(res => res.json())
       .then(response => {
-        alert("Data berhasil dikirim ke Google Sheets!");
-        document.getElementById("returForm").reset();
+        if (response.records) {
+          alert("Data berhasil dikirim ke Airtable!");
+          document.getElementById("returForm").reset();
+        } else {
+          alert("Gagal mengirim data ke Airtable!");
+          console.error(response);
+        }
       })
       .catch(err => {
         alert("Gagal mengirim data!");
@@ -107,7 +119,7 @@
       });
     });
 
-    // Daftarkan Service Worker
+    // ========== SERVICE WORKER ==========
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('service-worker.js')
         .then(() => console.log('Service Worker terdaftar!'));
@@ -115,4 +127,3 @@
   </script>
 </body>
 </html>
-y
