@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Second Sweet Reture</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="manifest" href="manifest.json" />
+</head>
+<body>
+  <h1>Form Retur - Second Sweet Reture</h1>
+
+  <form id="returForm">
+    <label>Username:</label>
+    <input type="text" name="username" required />
+
+    <label>Nama Penerima:</label>
+    <input type="text" name="nama" required />
+
+    <label>Nomor HP:</label>
+    <input type="tel" name="nomor_hp" required />
+
+    <label>Alamat:</label>
+    <textarea name="alamat" required></textarea>
+
+    <label>Tanggal Pesanan:</label>
+    <input type="date" name="tgl_pesanan" required />
+
+    <label>Tanggal Retur:</label>
+    <input type="date" name="tgl_retur" required />
+
+    <label>Alasan Retur:</label>
+    <textarea name="alasan" required></textarea>
+
+    <button type="submit">Kirim</button>
+  </form>
+
+  <button onclick="logout()">Logout</button>
+
+  <!-- Firebase SDK (modular) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBKHl5yyXVwI27W3C9Q504mMWMoGkm6hlo",
+      authDomain: "second-sweet-reture.firebaseapp.com",
+      projectId: "second-sweet-reture",
+      storageBucket: "second-sweet-reture.firebasestorage.app",
+      messagingSenderId: "927142234886",
+      appId: "1:927142234886:web:7e663ad5c85533854aac87",
+      measurementId: "G-QDP6FPLE5C"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // Cek status login
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        alert("Anda belum login.");
+        window.location.href = "login.html";
+      } else {
+        localStorage.setItem("loggedInEmail", user.email);
+      }
+    });
+
+    // Logout
+    window.logout = function () {
+      signOut(auth).then(() => {
+        localStorage.removeItem("loggedInEmail");
+        alert("Logout berhasil");
+        window.location.href = "login.html";
+      });
+    };
+
+    // Kirim data ke Google Sheets
+    document.getElementById("returForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const formData = {
+        email: localStorage.getItem("loggedInEmail"),
+        username: document.querySelector('[name="username"]').value,
+        nama: document.querySelector('[name="nama"]').value,
+        nomor_hp: document.querySelector('[name="nomor_hp"]').value,
+        alamat: document.querySelector('[name="alamat"]').value,
+        tgl_pesanan: document.querySelector('[name="tgl_pesanan"]').value,
+        tgl_retur: document.querySelector('[name="tgl_retur"]').value,
+        alasan: document.querySelector('[name="alasan"]').value
+      };
+
+      fetch("https://script.google.com/macros/s/AKfycby__TDbSfvRgQeN0xIIYe8_t0yUl-ocEOT-tgOBJLDYasdXCtswQGsnow2mYpbRULAo/exec", {
+        method: "POST",
+        body: JSON.stringify(formData),
+        headers: {
+          "Content-Type": "application/json"
+        }
+      })
+      .then(res => res.text())
+      .then(response => {
+        alert("Data berhasil dikirim ke Google Sheets!");
+        document.getElementById("returForm").reset();
+      })
+      .catch(err => {
+        alert("Gagal mengirim data!");
+        console.error(err);
+      });
+    });
+
+    // Daftarkan Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(() => console.log('Service Worker terdaftar!'));
+    }
+  </script>
+</body>
+</html>
+y

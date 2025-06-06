@@ -1,0 +1,67 @@
+=== login.html ===
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - Second Sweet Reture</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>Login Second Sweet Reture</h1>
+  <button onclick="loginWithGoogle()">Login dengan Google</button>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBKHl5yyXVwI27W3C9Q504mMWMoGkm6hlo",
+      authDomain: "second-sweet-reture.firebaseapp.com",
+      projectId: "second-sweet-reture",
+      storageBucket: "second-sweet-reture.firebasestorage.app",
+      messagingSenderId: "927142234886",
+      appId: "1:927142234886:web:7e663ad5c85533854aac87",
+      measurementId: "G-QDP6FPLE5C"
+    };
+
+    // Inisialisasi Firebase & Auth
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    // Fungsi login
+    window.loginWithGoogle = () => {
+      signInWithPopup(auth, provider)
+        .then((result) => {
+          const email = result.user.email;
+          localStorage.setItem("loggedInEmail", email);
+          alert("Login berhasil sebagai: " + email);
+          window.location.href = "index.html";
+        })
+        .catch((error) => {
+          alert("Login gagal: " + error.message);
+        });
+    };
+
+    // Fungsi logout
+    window.logout = () => {
+      signOut(auth).then(() => {
+        localStorage.removeItem("loggedInEmail");
+        alert("Logout berhasil");
+        window.location.href = "login.html";
+      });
+    };
+
+    // Cek status login
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        localStorage.setItem("loggedInEmail", user.email);
+      } else {
+        localStorage.removeItem("loggedInEmail");
+      }
+    });
+  </script>
+</body>
+</html>
