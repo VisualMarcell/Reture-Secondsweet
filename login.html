@@ -8,12 +8,11 @@
 </head>
 <body>
   <h1>Second Sweet Return Login</h1>
-  <button onclick="loginWithGoogle()">Login dengan Google</button>
+  <button type="button" onclick="loginWithGoogle()">Login dengan Google</button>
 
-  <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBKHl5yyXVwI27W3C9Q504mMWMoGkm6hlo",
@@ -25,18 +24,15 @@
       measurementId: "G-QDP6FPLE5C"
     };
 
-    // Inisialisasi Firebase & Auth
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
 
-    // Fungsi login
     window.loginWithGoogle = () => {
       signInWithPopup(auth, provider)
         .then((result) => {
           const email = result.user.email;
           localStorage.setItem("loggedInEmail", email);
-          alert("Login berhasil sebagai: " + email);
           window.location.href = "index.html";
         })
         .catch((error) => {
@@ -44,19 +40,13 @@
         });
     };
 
-    // Fungsi logout
-    window.logout = () => {
-      signOut(auth).then(() => {
-        localStorage.removeItem("loggedInEmail");
-        alert("Logout berhasil");
-        window.location.href = "login.html";
-      });
-    };
-
-    // Cek status login
+    // Autologin: redirect ke index kalau sudah login
     onAuthStateChanged(auth, (user) => {
       if (user) {
         localStorage.setItem("loggedInEmail", user.email);
+        if (window.location.pathname.endsWith("login.html")) {
+          window.location.href = "index.html";
+        }
       } else {
         localStorage.removeItem("loggedInEmail");
       }

@@ -71,45 +71,37 @@
       });
     };
 
-    // ========== KIRIM DATA KE AIRTABLE ==========
+    // ========== KIRIM DATA KE BACKEND ==========
     document.getElementById("returForm").addEventListener("submit", function (e) {
       e.preventDefault();
 
-      const API_KEY = "pat82jgd9bLAaUqxk.6429f0b8df5bee458b3ecce387235f4023c2b395f3b0405622b9f8378f4a15da"; // <-- Ganti dengan Personal Access Token Airtable
-      const BASE_ID = "appCS1r5N9daQtLNI"; // <-- Ganti dengan Base ID kamu
-      const TABLE_NAME = "Data%20Retur"; // (URL-encoded jika ada spasi: Data Retur -> Data%20Retur)
-
-      // Siapkan data sesuai dengan kolom di Airtable
+      // Ambil data dari form
       const formData = {
-        "Email": localStorage.getItem("loggedInEmail"),
-        "Username": document.querySelector('[name="username"]').value,
-        "Nama": document.querySelector('[name="nama"]').value,
-        "Nomor HP": document.querySelector('[name="nomor_hp"]').value,
-        "Alamat": document.querySelector('[name="alamat"]').value,
-        "Tanggal Pesanan": document.querySelector('[name="tgl_pesanan"]').value,
-        "Tanggal Retur": document.querySelector('[name="tgl_retur"]').value,
-        "Alasan": document.querySelector('[name="alasan"]').value
+        email: localStorage.getItem("loggedInEmail"),
+        username: document.querySelector('[name="username"]').value,
+        nama: document.querySelector('[name="nama"]').value,
+        nomor_hp: document.querySelector('[name="nomor_hp"]').value,
+        alamat: document.querySelector('[name="alamat"]').value,
+        tgl_pesanan: document.querySelector('[name="tgl_pesanan"]').value,
+        tgl_retur: document.querySelector('[name="tgl_retur"]').value,
+        alasan: document.querySelector('[name="alasan"]').value
       };
 
-      fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_NAME}`, {
+      // Ganti URL berikut jika backend sudah di-deploy online
+      fetch("https://reture-secondsweet-production.up.railway.app/submit", {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${API_KEY}`,
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-          records: [
-            { fields: formData }
-          ]
-        })
+        body: JSON.stringify(formData)
       })
       .then(res => res.json())
       .then(response => {
-        if (response.records) {
-          alert("Data berhasil dikirim ke Airtable!");
+        if (response.success) {
+          alert("Data berhasil dikirim!");
           document.getElementById("returForm").reset();
         } else {
-          alert("Gagal mengirim data ke Airtable!");
+          alert("Gagal mengirim data ke server backend!");
           console.error(response);
         }
       })
